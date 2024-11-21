@@ -66,15 +66,15 @@ export const verifyEmail = async (req, res) => {
   try {
     const user = await User.findOne({
       verificationToken: token,
-      verificationTokenExpiresAt: { $gt: Date.now() } // make sure the token is not expired
+      verificationTokenExpiresAt: { $gt: Date.now() }, // make sure the token is not expired
     });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired verification token"
-      })
-    };
+        message: "Invalid or expired verification token",
+      });
+    }
 
     user.isVerified = true;
     user.verificationToken = undefined;
@@ -88,14 +88,14 @@ export const verifyEmail = async (req, res) => {
       message: "Email verified successfully",
       user: {
         ...user._doc,
-        password: undefined
-      }
+        password: undefined,
+      },
     });
   } catch (error) {
     console.log("Error in verify email ", error.message);
     res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
@@ -109,18 +109,18 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials"
-      })
-    };
+        message: "Invalid credentials",
+      });
+    }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials"
-      })
-    };
+        message: "Invalid credentials",
+      });
+    }
 
     generateTokenAndSetCookie(res, user._id);
 
@@ -133,15 +133,14 @@ export const login = async (req, res) => {
       message: "Logged in successfully",
       user: {
         ...user._doc,
-        password: undefined
-      }
+        password: undefined,
+      },
     });
-
   } catch (error) {
     console.error("Error in Login: ", error.message);
     res.status(400).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
@@ -151,35 +150,43 @@ export const logout = async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message: "Logged out successfully"
+    message: "Logged out successfully",
   });
 };
 
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
-  
+
   try {
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid credentials"
-      })
-    };
+        message: "Invalid credentials",
+      });
+    }
 
     // Generate reset token
     const resetToken = crypto.randomBytes(20).toString("hex");
-    const resetTokenExpiresAt = Date.now() + 30 * 60 * 1000 // 30 minutes
+    const resetTokenExpiresAt = Date.now() + 30 * 60 * 1000; // 30 minutes
 
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpiresAt = resetTokenExpiresAt;
     await user.save();
 
     // send password reset email
-    await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+    await sendPasswordResetEmail(
+      user.email,
+      `${process.env.CLIENT_URL}/reset-password/${resetToken}`
+    );
 
-    res.status(200).json({ success: true, message: "Password reset link sent successfully" });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Password reset link sent successfully",
+      });
   } catch (error) {
     console.log("Error in forgotPassword ", error);
     res.status(400).json({ success: false, message: error.message });
@@ -192,13 +199,23 @@ export const resetPassword = async (req, res) => {
     const { password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) {
-      return res.status(400).json({ success: false, message: "Password and Confirm Password fields do not match" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Password and Confirm Password fields do not match",
+        });
     }
 
-    const user = await User.findOne({ resetPasswordToken: token, resetPasswordExpiresAt: { $gt: Date.now() } });
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpiresAt: { $gt: Date.now() },
+    });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired reset token" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired reset token" });
     }
 
     //update password
@@ -211,9 +228,31 @@ export const resetPassword = async (req, res) => {
 
     await sendResetSuccessEmail(user.email);
 
-    res.status(200).json({ success: true, message: "Password reset successful" });
+    res
+      .status(200)
+      .json({ success: true, message: "Password reset successful" });
   } catch (error) {
     console.error("Error in resetPassword", error);
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+export const checkAuth = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).select("-password");
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("Error in checkAuth ", error);
     res.status(400).json({ success: false, message: error.message });
   }
 };
