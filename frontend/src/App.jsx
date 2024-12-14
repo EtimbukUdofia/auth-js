@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 import { Toaster } from "react-hot-toast"
 import FloatingShape from "./components/FloatingShape"
+import LoadingSpinner from "./components/LoadingSpinner"
 
 import SignUpPage from "./pages/SignUpPage"
 import LoginPage from "./pages/LoginPage"
@@ -43,8 +44,7 @@ function App() {
     checkAuth();
   }, [checkAuth]);
 
-  console.log("isauthenticated", isAuthenticated);
-  console.log("user", user);
+  if (isCheckingAuth) return <LoadingSpinner />
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 flex items-center justify-center relative overflow-hidden">
