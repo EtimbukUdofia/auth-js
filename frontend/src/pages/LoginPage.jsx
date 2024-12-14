@@ -1,17 +1,26 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../components/Input";
+import { useAuthStore } from "../store/authStore";
+import axios from "axios";
 
 const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const isLoading = false;
+  const navigate = useNavigate();
+  const { login, isLoading, error } = useAuthStore();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    navigate("/");
+    try {
+      await login(email, password);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -34,7 +43,7 @@ const LoginPage = () => {
             type = "email"
             placeholder="Email Address"
             value={email}
-            onchange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
 
           <Input
@@ -42,7 +51,7 @@ const LoginPage = () => {
             type = "password"
             placeholder="Password"
             value={password}
-            onchange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           <div className="flex items-center mb-6">
@@ -50,6 +59,8 @@ const LoginPage = () => {
               Forgot password?
             </Link>
           </div>
+
+          {error && <p className="text-red-500 font-semibold mb-2">{ error }</p>}
 
           <motion.button
             whileHover={{ scale: 1.02 }}
