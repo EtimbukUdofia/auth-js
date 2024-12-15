@@ -10,6 +10,7 @@ import HomePage from "./pages/HomePage"
 
 import { useAuthStore } from "./store/authStore"
 import { useEffect } from "react"
+import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 
 // protect routes that require authentication
 const ProtectRoute = ({ children }) => {
@@ -38,7 +39,7 @@ const RedirectAuthenticatedUser = ({ children }) => {
 };
 
 function App() {
-  const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
+  const { isCheckingAuth, checkAuth } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
@@ -95,6 +96,11 @@ function App() {
         <Route path="/verify-email" element={
           <RedirectAuthenticatedUser>
             <EmailVerificationPage />
+          </RedirectAuthenticatedUser>
+        } />
+        <Route path="/forgot-password" element={
+          <RedirectAuthenticatedUser>
+            <ForgotPasswordPage />
           </RedirectAuthenticatedUser>
         } />
       </Routes>
