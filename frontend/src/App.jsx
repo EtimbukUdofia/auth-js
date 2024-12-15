@@ -11,6 +11,7 @@ import HomePage from "./pages/HomePage"
 import { useAuthStore } from "./store/authStore"
 import { useEffect } from "react"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import ResetPasswordPage from "./pages/ResetPasswordPage"
 
 // protect routes that require authentication
 const ProtectRoute = ({ children }) => {
@@ -77,6 +78,7 @@ function App() {
             <HomePage />
           </ProtectRoute>
         } />
+
         <Route
           path="/signup"
           element={
@@ -85,6 +87,7 @@ function App() {
             </RedirectAuthenticatedUser>
           }
         />
+
         <Route
           path="/login"
           element={
@@ -93,14 +96,22 @@ function App() {
             </RedirectAuthenticatedUser>
           }
         />
+
         <Route path="/verify-email" element={
           <RedirectAuthenticatedUser>
             <EmailVerificationPage />
           </RedirectAuthenticatedUser>
         } />
+
         <Route path="/forgot-password" element={
           <RedirectAuthenticatedUser>
             <ForgotPasswordPage />
+          </RedirectAuthenticatedUser>
+        } />
+
+        <Route path="/reset-password/:token" element={
+          <RedirectAuthenticatedUser>
+            <ResetPasswordPage />
           </RedirectAuthenticatedUser>
         } />
       </Routes>
